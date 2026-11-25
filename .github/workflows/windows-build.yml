@@ -1,0 +1,39 @@
+name: Windows x64 Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [victory-amd]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: release
+            flags: ""
+          - profile: diag
+            flags: "--features diagnostics"
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install
+      - name: Build Windows x64
+        run: cargo build --locked --target x86_64-pc-windows-msvc --profile ${{ matrix.profile }} -p victory ${{ matrix.flags }}
+      - name: Package executable
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item "target/x86_64-pc-windows-msvc/${{ matrix.profile }}/victory.exe" dist/
+          Copy-Item victory.example.toml, LICENSE, README.md dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: victory-windows-x64-${{ matrix.profile }}
+          path: dist/
+          if-no-files-found: error
