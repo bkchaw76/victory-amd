@@ -41,6 +41,21 @@ outdoor gameplay. Ray-traced light still does not run (shadowed areas are black)
 frames are 350-500 ms with spikes of seconds where texture refreshes wait for the
 runtime's remapping of title memory. `cargo test --workspace`: 519 passed.
 
+### Frametime dump
+
+From [skornuta/victory-frametime](https://github.com/skornuta/victory-frametime) (GPL-3.0, as
+upstream), on branch `frametime-dump`. Build first: `cargo build --release -p victory`.
+Run with `VICTORY_FRAMETIME_DUMP=1` and the CSV is at
+`%LOCALAPPDATA%\victory\cache\frametime.csv` (`victory config` prints `cache_dir`); or name
+the file: `VICTORY_FRAMETIME_DUMP=<path>` (its folder must exist). The log prints
+`frametime dump path=...` when the first frame lands. One row per ~1 s: time per frame and
+its parts (preparing, copies, textures, GPU, copy-back), the worst and average single
+frame, the card's busy share, the process's private memory and processor use.
+
+The file starts with a `#` block describing the machine (processor, graphics card and
+driver, memory, Windows version, motherboard, display) and every `VICTORY_*` switch that
+is set, including paths such as `VICTORY_DATA_DIR`: look at it before sharing a dump.
+
 Tested on one machine only: Windows 11, Radeon RX 7800 XT 16 GB (driver
 32.0.32015.7029), Ryzen 7 7700X, 32 GB RAM, Series X profile. Other GPUs,
 NVIDIA's especially, may behave differently.
